@@ -19,7 +19,7 @@ This library is intented for implementing listeners [DonationAlerts][donation-al
 
 [![jitpack][]](https://jitpack.io/#Marshmachell/donationalerts4j)
 
-This library is available only on [JitPack](https://jitpack.io). The latest version is always shown in the [GitHub Release](https://github.com/Marshmachell/donationalerts4j/releases/last).
+This library is available only on [JitPack](https://jitpack.io). The latest version is always shown in the [GitHub Release](https://github.com/Marshmachell/donationalerts4j/releases/latest).
 
 The minimum java version supported by JDA is **Java SE 8**.
 
