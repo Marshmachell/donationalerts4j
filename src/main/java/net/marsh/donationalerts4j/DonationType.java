@@ -30,24 +30,15 @@ public enum DonationType {
 
     public static DonationType fromValue(int value) {
         switch (value) {
-            case 1:
-                return DonationType.Donation;
-            case 4:
-                return DonationType.TwitchSubscription;
-            case 6:
-                return DonationType.TwitchFollow;
-            case 7:
-                return DonationType.YouTubeSubscription;
-            case 11:
-                return DonationType.TwitchBits;
-            case 13:
-                return DonationType.TwitchGiftSubscription;
-            case 15:
-                return DonationType.TwitchPrimeSubscription;
-            case 19:
-                return DonationType.TwitchPoints;
-            default:
-                return DonationType.Undefined;
+            case 1: return DonationType.Donation;
+            case 4: return DonationType.TwitchSubscription;
+            case 6: return DonationType.TwitchFollow;
+            case 7: return DonationType.YouTubeSubscription;
+            case 11: return DonationType.TwitchBits;
+            case 13: return DonationType.TwitchGiftSubscription;
+            case 15: return DonationType.TwitchPrimeSubscription;
+            case 19: return DonationType.TwitchPoints;
+            default: return DonationType.Undefined;
         }
     }
 }

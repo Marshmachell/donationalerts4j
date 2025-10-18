@@ -9,11 +9,11 @@
 
 # donationalerts4j (Donation Alerts For Java)
 
-This library is intented for implementing listeners [DonationAlerts][donation-alerts]
+This library is intented for implementing listeners [DonationAlerts][donation-alerts].
 
 ## 📖 Overview
 
-[donationalerts4j][self] will allow you to listen to any notifications coming from your DonationAlerts account using the event system
+[donationalerts4j][self] will allow you to listen to any notifications coming from your DonationAlerts account using the event system.
 
 ## 🔬 Installation
 
@@ -58,7 +58,7 @@ dependencies {
 
 Simply logging messages to the console.
 
-Creating your DonationAlertsClient instance and attaching an event listener
+Creating your DonationAlertsClient instance and attaching an event listener:
 
 ```java
 public static void main(String[] args) throws URISyntaxException {
