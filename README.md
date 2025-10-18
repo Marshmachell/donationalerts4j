@@ -50,7 +50,7 @@ dependencies {
 <dependency>
 	    <groupId>com.github.Marshmachell</groupId>
 	    <artifactId>donationalerts4j</artifactId>
-	    <version>-SNAPSHOT</version> <!-- replace $version with the latest version -->
+	    <version>$version</version> <!-- replace $version with the latest version -->
 </dependency>
 ```
 
