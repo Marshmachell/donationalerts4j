@@ -17,7 +17,7 @@ This library is intented for implementing listeners [DonationAlerts][donation-al
 
 ## 🔬 Installation
 
-[![jitpack][]](https://jitpack.io/#Marshmachell/donationalerts4j)
+[![jitpack][]](https://jitpack.io/#Marshmachell/donationalerts4j) [![](https://jitpack.io/v/Marshmachell/donationalerts4j.svg)](https://jitpack.io/#Marshmachell/donationalerts4j)
 
 This library is available only on [JitPack](https://jitpack.io). The latest version is always shown in the [GitHub Release](https://github.com/Marshmachell/donationalerts4j/releases/latest).
 
