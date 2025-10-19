@@ -3,6 +3,7 @@
 [license-shield]: https://img.shields.io/badge/License-Apache%202.0-white.svg
 [donation-alerts]: https://www.donationalerts.com/
 [self]: https://github.com/Marshmachell/donationalerts4j/
+[dashboard]: https://www.donationalerts.com/dashboard/general-settings/account
 
 [![jitpack][]](https://jitpack.io/#Marshmachell/donationalerts4j)
 [![license-shield][]][license]
@@ -58,7 +59,7 @@ dependencies {
 
 Simply logging messages to the console.
 
-Creating your DonationAlertsClient instance and attaching an event listener:
+Creating your DonationAlertsClient instance with token from [dashboard][dashboard] and attaching an event listener:
 
 ```java
 public static void main(String[] args) throws URISyntaxException {
