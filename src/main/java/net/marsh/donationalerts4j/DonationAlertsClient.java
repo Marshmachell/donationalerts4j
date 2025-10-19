@@ -16,14 +16,16 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class DonationAlertsClient {
-    protected final Logger LOGGER = Logger.getLogger(this.getClass().getName());
-    protected final List<DonationListener> DONATION_LISTENERS = new ArrayList<>();
-    protected static final String SOCKET_URI = "https://socket.donationalerts.ru:443";
-    protected final Socket SOCKET;
-    protected String TOKEN;
+    private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
+    private final List<DonationListener> DONATION_LISTENERS = new ArrayList<>();
+    private static final String SOCKET_URI = "https://socket.donationalerts.ru:443";
+    private final Socket SOCKET;
+    private String TOKEN;
 
     public DonationAlertsClient(String token) throws URISyntaxException {
-        URI url = new URI(SOCKET_URI); SOCKET = IO.socket(url); this.TOKEN = token;
+        if (token == null || token.trim().isEmpty()) {throw new IllegalArgumentException("Token cannot be null!");}
+
+        URI url = new URI(SOCKET_URI); SOCKET = IO.socket(url); this.TOKEN = token.trim();
         SOCKET.on(Socket.EVENT_CONNECT, handleConnect()).on(Socket.EVENT_DISCONNECT, handleDisconnect()).on(Socket.EVENT_ERROR, handleError()).on("donation", handleDonation());
     }
 
@@ -36,7 +38,7 @@ public class DonationAlertsClient {
             if (arg.length < 1 || !((String)arg[0]).contains("referrer")) return;
             String json = arg[0].toString();
 
-            this.fire(DonationEvent.Builder.fromJson(json));
+            this.callEvent(DonationEvent.Builder.fromJson(json));
         };
     }
 
@@ -57,7 +59,7 @@ public class DonationAlertsClient {
                     .put("token", this.TOKEN)
                     .put("type", "minor"));
         } catch (JSONException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to build connection", e);
         }
     }
 
@@ -66,7 +68,11 @@ public class DonationAlertsClient {
         return this;
     }
 
-    public void fire(DonationEvent event) {
+    private void callEvent(DonationEvent event) {
         this.DONATION_LISTENERS.forEach(listener -> listener.onDonation(event));
+    }
+
+    public void emitDonate(DonationEvent event) {
+        this.callEvent(event);
     }
 }

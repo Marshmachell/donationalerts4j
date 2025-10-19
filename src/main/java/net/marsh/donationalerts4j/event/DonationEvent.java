@@ -8,6 +8,7 @@ import net.marsh.donationalerts4j.DonationType;
 import java.util.Date;
 
 public class DonationEvent {
+    private transient String originalJson;
     private static final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
 
     @SerializedName("id")
@@ -60,9 +61,16 @@ public class DonationEvent {
     public String getApId() { return apId; }
     public boolean isTest() { return IsTest; }
 
+    public String toJson() {
+        return originalJson;
+    }
+
     public static class Builder {
         public static DonationEvent fromJson(Object json) {
-            return gson.fromJson((String) json, DonationEvent.class);
+            String jsonString = (String) json;
+            DonationEvent event = gson.fromJson(jsonString, DonationEvent.class);
+            event.originalJson = jsonString;
+            return event;
         }
     }
 }
