@@ -72,7 +72,7 @@ public class DonationBuilder {
     }
 
     public DonationEvent build() {
-        var js = String.format(
+        String js = String.format(
                 "{\"id\":%s,\"alert_type\":\"%s\",\"is_shown\":\"%s\",\"additional_data\":\"{\\\"randomness\\\":%s\"},\"billing_system\":\"fake\",\"username\":\"%s\",\"amount\":%s,\"amount_formatted\":\"%s\",\"amount_main\":%s,\"currency\":\"%s\",\"message\":\"%s\",\"date_created\":\"%s\",\"_is_test_alert\":%s}",
                 ID, type, IsShown, (int) (Math.random() * 1000), escapeJson(username), amount, String.format("%.2f", amount).replace(".", ","), amount, currency, escapeJson(message), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dateCreated), IsTest
         );
