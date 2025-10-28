@@ -13,10 +13,11 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public class DonationAlertsClient {
-    private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
+    private final Logger LOGGER = LogManager.getLogManager().getLogger(this.getClass().getName());
     private final List<DonationListener> DONATION_LISTENERS = new ArrayList<>();
     private static final String SOCKET_URI = "https://socket.donationalerts.ru:443";
     private final Socket SOCKET;
