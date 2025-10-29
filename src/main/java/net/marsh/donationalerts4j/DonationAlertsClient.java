@@ -13,17 +13,17 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public class DonationAlertsClient {
-    private final Logger LOGGER = LogManager.getLogManager().getLogger(this.getClass().getName());
+    private final Logger LOGGER;
     private final List<DonationListener> DONATION_LISTENERS = new ArrayList<>();
     private static final String SOCKET_URI = "https://socket.donationalerts.ru:443";
     private final Socket SOCKET;
     private String TOKEN;
 
     public DonationAlertsClient(String token) throws URISyntaxException {
+        this.LOGGER = Logger.getLogger(getClass().getName());
         if (token == null || token.trim().isEmpty()) {throw new IllegalArgumentException("Token cannot be null!");}
 
         URI url = new URI(SOCKET_URI); SOCKET = IO.socket(url); this.TOKEN = token.trim();
