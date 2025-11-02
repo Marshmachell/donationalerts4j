@@ -34,7 +34,7 @@ repositories {
 
 dependencies {
     implementation("com.github.Marshmachell:donationalerts4j:$version")
-	             // replace $version with the latest version ^
+	// replace $version with the latest version
 }
 ```
 
