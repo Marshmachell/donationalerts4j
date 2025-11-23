@@ -1,5 +1,7 @@
 package net.marsh.donationalerts4j;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -32,14 +34,22 @@ public class DonationAlertsClient {
 
     private Emitter.Listener handleConnect() {return arg -> LOGGER.info("Successfully connected!");}
     private Emitter.Listener handleDisconnect() {return arg -> LOGGER.info("Disconnected");}
-    private Emitter.Listener handleError() {return arg -> LOGGER.warning(String.format("Error %s", arg[0].toString()));}
+    private Emitter.Listener handleError() {return arg -> LOGGER.severe(String.format("Error %s", arg[0].toString()));}
 
     private Emitter.Listener handleDonation() {
         return arg -> {
             if (arg.length < 1 || !((String)arg[0]).contains("referrer")) return;
             String json = arg[0].toString();
 
-            this.callEvent(DonationEvent.Builder.fromJson(json));
+            try {
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("token", this.TOKEN);
+                new Gson().fromJson(json, JsonObject.class).entrySet().forEach(e -> jsonObject.add(e.getKey(), e.getValue()));
+                this.fire(DonationEvent.Builder.fromJson(jsonObject));
+
+            } catch (Exception e) {
+                LOGGER.severe(String.format("Error parsing JSON: %s", e.getMessage()));
+            }
         };
     }
 
@@ -69,11 +79,11 @@ public class DonationAlertsClient {
         return this;
     }
 
-    private void callEvent(DonationEvent event) {
+    private void fire(DonationEvent event) {
         this.DONATION_LISTENERS.forEach(listener -> listener.onDonation(event));
     }
 
-    public void emitDonate(DonationEvent event) {
-        this.callEvent(event);
+    public void emit(DonationEvent event) {
+        this.fire(event);
     }
 }

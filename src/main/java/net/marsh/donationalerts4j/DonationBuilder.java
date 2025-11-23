@@ -2,6 +2,7 @@ package net.marsh.donationalerts4j;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import net.marsh.donationalerts4j.event.DonationEvent;
 
 import java.text.SimpleDateFormat;
@@ -72,19 +73,24 @@ public class DonationBuilder {
     }
 
     public DonationEvent build() {
-        String js = String.format(
-                "{\"id\":%s,\"alert_type\":\"%s\",\"is_shown\":\"%s\",\"additional_data\":\"{\\\"randomness\\\":%s\"},\"billing_system\":\"fake\",\"username\":\"%s\",\"amount\":%s,\"amount_formatted\":\"%s\",\"amount_main\":%s,\"currency\":\"%s\",\"message\":\"%s\",\"date_created\":\"%s\",\"_is_test_alert\":%s}",
-                ID, type, IsShown, (int) (Math.random() * 1000), escapeJson(username), amount, String.format("%.2f", amount).replace(".", ","), amount, currency, escapeJson(message), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dateCreated), IsTest
-        );
-        return DonationEvent.Builder.fromJson(js);
-    }
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("id", ID);
+        jsonObject.addProperty("alert_type", type);
+        jsonObject.addProperty("is_shown", IsShown);
 
-    private String escapeJson(String text) {
-        if (text == null) return "";
-        return text.replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t");
+        JsonObject additionalData = new JsonObject();
+        additionalData.addProperty("randomness", (int) (Math.random() * 1000));
+
+        jsonObject.add("additional_data", additionalData);
+        jsonObject.addProperty("billing_system", "fake");
+        jsonObject.addProperty("username", username);
+        jsonObject.addProperty("amount", String.valueOf(amount));
+        jsonObject.addProperty("amount_formatted", String.format("%.2f", amount).replace(".", ","));
+        jsonObject.addProperty("amount_main", amount);
+        jsonObject.addProperty("currency", currency);
+        jsonObject.addProperty("message", message);
+        jsonObject.addProperty("date_created", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dateCreated));
+        jsonObject.addProperty("_is_test_alert", IsTest);
+        return DonationEvent.Builder.fromJson(jsonObject);
     }
 }
