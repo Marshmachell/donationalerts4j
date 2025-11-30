@@ -38,13 +38,11 @@ public class DonationAlertsClient {
 
     private Emitter.Listener handleDonation() {
         return arg -> {
-            if (arg.length < 1 || !((String)arg[0]).contains("referrer")) return;
-            String json = arg[0].toString();
-
+            if (arg.length < 1 || ((String)arg[0]).contains("referrer")) return;
             try {
                 JsonObject jsonObject = new JsonObject();
                 jsonObject.addProperty("token", this.TOKEN);
-                new Gson().fromJson(json, JsonObject.class).entrySet().forEach(e -> jsonObject.add(e.getKey(), e.getValue()));
+                new Gson().fromJson(arg[0].toString(), JsonObject.class).entrySet().forEach(e -> jsonObject.add(e.getKey(), e.getValue()));
                 this.fire(DonationEvent.Builder.fromJson(jsonObject));
 
             } catch (Exception e) {
