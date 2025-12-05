@@ -39,16 +39,18 @@ public class DonationAlertsClient {
     private Emitter.Listener handleDonation() {
         return arg -> {
             if (arg.length < 1/* || ((String)arg[0]).contains("referrer")*/) return;
+            String message = arg[0].toString();
 
             try {
                 JsonObject jsonObject = new JsonObject();
                 jsonObject.addProperty("token", this.TOKEN);
-                new Gson().fromJson(arg[0].toString(), JsonObject.class).entrySet().forEach(e -> jsonObject.add(e.getKey(), e.getValue()));
+
+                new Gson().fromJson(message, JsonObject.class).entrySet().forEach(e -> jsonObject.add(e.getKey(), e.getValue()));
                 DonationEvent event = DonationEvent.Builder.fromJson(jsonObject);
-                if (event.getType().equals(DonationType.Donation) && arg[0].toString().contains("referrer")) return;
 
+                if (event.getType().equals(DonationType.Donation) && jsonObject.has("referrer")) return;
+                else if (event.getType().equals(DonationType.TwitchPoints) && !jsonObject.get("referrer").isJsonNull()) return;
                 this.fire(event);
-
             } catch (Exception e) {
                 LOGGER.severe(String.format("Error parsing JSON: %s", e.getMessage()));
             }
@@ -81,7 +83,7 @@ public class DonationAlertsClient {
         return this;
     }
 
-    private void fire(DonationEvent event) {
+    private synchronized void fire(DonationEvent event) {
         this.DONATION_LISTENERS.forEach(listener -> listener.onDonation(event));
     }
 
