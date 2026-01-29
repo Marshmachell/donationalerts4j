@@ -60,14 +60,6 @@ public abstract class AlertEvent {
         return messageType;
     }
 
-    public void handle(AlertListener listener) {
-        listener.onAlert(this);
-    }
-
-    public void handle(AlertListener listener, JsonObject json) {
-        listener.onAlert(this);
-    }
-
     public static class Builder {
         private final String json;
 

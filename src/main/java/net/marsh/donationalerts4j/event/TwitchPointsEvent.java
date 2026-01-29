@@ -1,8 +1,5 @@
 package net.marsh.donationalerts4j.event;
 
-import com.google.gson.JsonObject;
-import net.marsh.donationalerts4j.listener.AlertListener;
-
 public class TwitchPointsEvent extends AlertEvent {
     @Override
     public String getUsername() {
@@ -15,11 +12,5 @@ public class TwitchPointsEvent extends AlertEvent {
 
     public String getTitle() {
         return additionalData != null && additionalData.eventData != null ? additionalData.eventData.reward.title : null;
-    }
-
-    @Override
-    public void handle(AlertListener listener, JsonObject jsonObject) {
-        super.handle(listener);
-        listener.onTwitchPoints(this);
     }
 }

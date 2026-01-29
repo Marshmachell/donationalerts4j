@@ -3,16 +3,16 @@ package net.marsh.donationalerts4j;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import net.marsh.donationalerts4j.annotation.AlertHandler;
 import net.marsh.donationalerts4j.event.AlertEvent;
+import net.marsh.donationalerts4j.handler.RegisteredHandler;
 import net.marsh.donationalerts4j.listener.AlertListener;
-import net.marsh.donationalerts4j.listener.ListenerAdapter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class DonationAlertsClient {
@@ -21,6 +21,7 @@ public class DonationAlertsClient {
     private final String token;
     private final Logger logger;
     private final List<AlertListener> listeners = new ArrayList<>();
+    private final Map<Class<? extends AlertEvent>, List<RegisteredHandler>> handlers = new HashMap<>();
     private final ClientConfiguration configuration;
 
     public DonationAlertsClient(String token, ClientConfiguration configuration) throws URISyntaxException {
@@ -30,7 +31,7 @@ public class DonationAlertsClient {
         }
 
         IO.Options options = new IO.Options();
-        options.port = 433;
+        options.port = 443;
         socket = IO.socket(WSS_URL, options);
 
         this.token = token.trim();
@@ -39,6 +40,24 @@ public class DonationAlertsClient {
                 .on(Socket.EVENT_DISCONNECT, handleDisconnect())
                 .on(Socket.EVENT_CONNECT_ERROR, handleError())
                 .on("donation", handleDonation());
+    }
+
+    public void registerListeners() {
+        for (AlertListener listener : listeners) {
+            for (Method method : listener.getClass().getDeclaredMethods()) {
+                if (!method.isAnnotationPresent(AlertHandler.class)) continue;
+                if (method.getParameterCount() != 1) continue;
+                if (!AlertEvent.class.isAssignableFrom(method.getParameterTypes()[0])) continue;
+
+                Class<? extends AlertEvent> type = method.getParameterTypes()[0].asSubclass(AlertEvent.class);
+                method.setAccessible(true);
+
+                AlertHandler annotation = method.getAnnotation(AlertHandler.class);
+                handlers.computeIfAbsent(type, k -> new ArrayList<>())
+                        .add(new RegisteredHandler(listener, method, annotation.priority()));
+            }
+        }
+        handlers.values().forEach(list -> list.sort(Comparator.comparing(RegisteredHandler::priority)));
     }
 
     public DonationAlertsClient(String token) throws URISyntaxException {
@@ -58,27 +77,30 @@ public class DonationAlertsClient {
                 throw new RuntimeException("Error establishing connection", e);
             }
 
-            if (this.configuration.isLogging()) logger.info("Successfully connected!");
+            if (this.configuration.logging()) logger.info("Successfully connected!");
         };
     }
+
     private Emitter.Listener handleDisconnect() {
         return arg -> {
-            if (this.configuration.isLogging()) logger.info("Disconnected");
+            if (this.configuration.logging()) logger.info("Disconnected");
         };
     }
+
     private Emitter.Listener handleError() {
         return arg -> {
-            if (this.configuration.isLogging()) logger.severe(String.format("Error %s", arg[0].toString()));
+            if (this.configuration.logging()) logger.severe(String.format("Error %s", arg[0].toString()));
         };
     }
+
     private Emitter.Listener handleDonation() {
         return arg -> {
             if (arg.length < 1) return;
             String content = arg[0].toString();
-            if (this.configuration.isDebugMode()) System.out.println(content);
+            if (this.configuration.debugMode()) System.out.println(content);
 
             try {
-                this.fire(new AlertEvent.Builder(content));
+                this.fire(new AlertEvent.Builder(content).build());
             } catch (Exception e) {
                 throw new RuntimeException("Error parsing JSON: ", e);
             }
@@ -100,18 +122,33 @@ public class DonationAlertsClient {
         socket.connect();
     }
 
-    public DonationAlertsClient addEventListeners(ListenerAdapter... listeners) {
+    public DonationAlertsClient addEventListeners(AlertListener... listeners) {
         Collections.addAll(this.listeners, listeners);
+        registerListeners();
         return this;
     }
 
-    private synchronized void fire(AlertEvent.Builder alertBuilder) {
-        this.listeners.forEach(listener -> alertBuilder.build().handle(listener, alertBuilder.getJson()));
+//    private synchronized void fire(AlertEvent.Builder alertBuilder) {
+//        this.listeners.forEach(listener -> alertBuilder.build().handle(listener, alertBuilder.getJson()));
+//    }
+
+    private synchronized void fire(AlertEvent event) {
+        for (Map.Entry<Class<? extends AlertEvent>, List<RegisteredHandler>> entry : handlers.entrySet()) {
+            if (entry.getKey().isAssignableFrom(event.getClass())) {
+                for (RegisteredHandler handler : entry.getValue()) {
+                    try {
+                        handler.method().invoke(handler.listener(), event);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
 
     public void emit(AlertEvent.Builder alertBuilder) {
-        if (this.configuration.isEmitDebugMode()) System.out.println(alertBuilder.getJson());
-        this.fire(alertBuilder);
+        if (this.configuration.deepDebugMode()) System.out.println(alertBuilder.getJson());
+        this.fire(alertBuilder.build());
     }
 
     @Override

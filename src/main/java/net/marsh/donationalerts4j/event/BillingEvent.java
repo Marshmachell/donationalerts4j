@@ -2,7 +2,6 @@ package net.marsh.donationalerts4j.event;
 
 import com.google.gson.annotations.SerializedName;
 import net.marsh.donationalerts4j.enums.Currency;
-import net.marsh.donationalerts4j.listener.AlertListener;
 
 public abstract class BillingEvent extends AlertEvent {
     @SerializedName("billing_system")
@@ -41,10 +40,4 @@ public abstract class BillingEvent extends AlertEvent {
     }
 
     public BillingEvent() {}
-
-    @Override
-    public void handle(AlertListener listener) {
-        super.handle(listener);
-        listener.onBilling(this);
-    }
 }
