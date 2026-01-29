@@ -3,13 +3,12 @@ package net.marsh.donationalerts4j;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import net.marsh.donationalerts4j.event.*;
+import net.marsh.donationalerts4j.event.AlertEvent;
 import net.marsh.donationalerts4j.listener.AlertListener;
 import net.marsh.donationalerts4j.listener.ListenerAdapter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,26 +16,28 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class DonationAlertsClient {
-    private final Logger LOGGER;
-    private final List<AlertListener> DONATION_LISTENERS = new ArrayList<>();
-    private static final String SOCKET_URL = "https://socket.donationalerts.ru:443";
-    private final Socket SOCKET;
-    private String TOKEN;
+    private static final String WSS_URL = "https://socket.donationalerts.ru";
+    private final Socket socket;
+    private final String token;
+    private final Logger logger;
+    private final List<AlertListener> listeners = new ArrayList<>();
     private final ClientConfiguration configuration;
 
     public DonationAlertsClient(String token, ClientConfiguration configuration) throws URISyntaxException {
-        this.LOGGER = Logger.getLogger(getClass().getName());
+        this.logger = Logger.getLogger(getClass().getName());
         if (token == null || token.trim().isEmpty()) {
             throw new IllegalArgumentException("Token cannot be null!");
         }
 
-        URI url = new URI(SOCKET_URL);
-        SOCKET = IO.socket(url);
-        this.TOKEN = token.trim();
+        IO.Options options = new IO.Options();
+        options.port = 433;
+        socket = IO.socket(WSS_URL, options);
+
+        this.token = token.trim();
         this.configuration = configuration;
-        SOCKET.on(Socket.EVENT_CONNECT, handleConnect())
+        socket.on(Socket.EVENT_CONNECT, handleConnect())
                 .on(Socket.EVENT_DISCONNECT, handleDisconnect())
-                .on(Socket.EVENT_ERROR, handleError())
+                .on(Socket.EVENT_CONNECT_ERROR, handleError())
                 .on("donation", handleDonation());
     }
 
@@ -45,13 +46,31 @@ public class DonationAlertsClient {
     }
 
     public String getToken() {
-        return TOKEN;
+        return token;
     }
 
-    private Emitter.Listener handleConnect() {return arg -> {if (this.configuration.isLogging()) LOGGER.info("Successfully connected!");};}
-    private Emitter.Listener handleDisconnect() {return arg -> {if (this.configuration.isLogging()) LOGGER.info("Disconnected");};}
-    private Emitter.Listener handleError() {return arg -> {if (this.configuration.isLogging()) LOGGER.severe(String.format("Error %s", arg[0].toString()));};}
+    private Emitter.Listener handleConnect() {
+        return arg -> {
+            try {
+                JSONObject connectPayload = new JSONObject().put("token", this.token).put("type", "minor");
+                socket.emit("add-user", connectPayload);
+            } catch (JSONException e) {
+                throw new RuntimeException("Error establishing connection", e);
+            }
 
+            if (this.configuration.isLogging()) logger.info("Successfully connected!");
+        };
+    }
+    private Emitter.Listener handleDisconnect() {
+        return arg -> {
+            if (this.configuration.isLogging()) logger.info("Disconnected");
+        };
+    }
+    private Emitter.Listener handleError() {
+        return arg -> {
+            if (this.configuration.isLogging()) logger.severe(String.format("Error %s", arg[0].toString()));
+        };
+    }
     private Emitter.Listener handleDonation() {
         return arg -> {
             if (arg.length < 1) return;
@@ -59,56 +78,44 @@ public class DonationAlertsClient {
             if (this.configuration.isDebugMode()) System.out.println(content);
 
             try {
-                this.fire(new AlertEventBuilder(content));
+                this.fire(new AlertEvent.Builder(content));
             } catch (Exception e) {
-                LOGGER.severe(String.format("Error parsing JSON: %s", e.getMessage()));
+                throw new RuntimeException("Error parsing JSON: ", e);
             }
         };
     }
 
     public void disconnect() {
-        SOCKET.close();
-        this.TOKEN = null;
+        socket.close();
     }
 
     public boolean isConnected() {
-        return SOCKET != null && SOCKET.connected();
+        return socket != null && socket.connected();
     }
 
-    public void build() {
-        if (isConnected()) {throw new RuntimeException("Client is already connected!");}
-        SOCKET.connect();
-        try {
-            SOCKET.emit("add-user", new JSONObject()
-                    .put("token", this.TOKEN)
-                    .put("type", "minor"));
-        } catch (JSONException e) {
-            throw new RuntimeException("Failed to build connection", e);
+    public void connect() {
+        if (isConnected()) {
+            throw new RuntimeException("Client is already connected!");
         }
+        socket.connect();
     }
 
     public DonationAlertsClient addEventListeners(ListenerAdapter... listeners) {
-        Collections.addAll(this.DONATION_LISTENERS, listeners);
+        Collections.addAll(this.listeners, listeners);
         return this;
     }
 
-    private synchronized void fire(AlertEventBuilder eventBuilder) {
-        /* Deprecated code
-        listener.onAlert(event);
-        if (event instanceof TwitchFollowEvent) listener.onTwitchFollow((TwitchFollowEvent) event);
-        else if (event instanceof TwitchPointsEvent) listener.onTwitchPoints((TwitchPointsEvent) event);
-        else if (event instanceof DonationEvent) listener.onDonation((DonationEvent) event);
-        */
-        this.DONATION_LISTENERS.forEach(listener -> eventBuilder.build().handle(listener, eventBuilder.getJson()));
+    private synchronized void fire(AlertEvent.Builder alertBuilder) {
+        this.listeners.forEach(listener -> alertBuilder.build().handle(listener, alertBuilder.getJson()));
     }
 
-    public void emit(AlertEventBuilder eventBuilder) {
-        if (this.configuration.isEmitDebugMode()) System.out.println(eventBuilder.getJson());
-        this.fire(eventBuilder);
+    public void emit(AlertEvent.Builder alertBuilder) {
+        if (this.configuration.isEmitDebugMode()) System.out.println(alertBuilder.getJson());
+        this.fire(alertBuilder);
     }
 
     @Override
     public String toString() {
-        return String.format("DonationAlertsClient[token=%s]", this.TOKEN);
+        return String.format("DonationAlertsClient[token=%s]", this.token);
     }
 }

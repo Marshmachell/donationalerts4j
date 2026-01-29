@@ -1,12 +1,11 @@
 package net.marsh.donationalerts4j.event;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import net.marsh.donationalerts4j.adapter.AdditionalDataAdapter;
 import net.marsh.donationalerts4j.data.AdditionalData;
-import net.marsh.donationalerts4j.data.RewardData;
-import net.marsh.donationalerts4j.data.UserData;
 import net.marsh.donationalerts4j.enums.AlertType;
 import net.marsh.donationalerts4j.listener.AlertListener;
 
@@ -67,5 +66,23 @@ public abstract class AlertEvent {
 
     public void handle(AlertListener listener, JsonObject json) {
         listener.onAlert(this);
+    }
+
+    public static class Builder {
+        private final String json;
+
+        public Builder(String json) {
+            this.json = json;
+        }
+
+        public JsonObject getJson() {
+            return new Gson().fromJson(json, JsonObject.class);
+        }
+
+        public AlertEvent build() {
+            JsonObject jsonObject = new Gson().fromJson(json, JsonObject.class);
+            AlertType alertType = AlertType.valueOf(jsonObject.get("alert_type").getAsInt());
+            return new Gson().fromJson(json, alertType.getEventClass());
+        }
     }
 }

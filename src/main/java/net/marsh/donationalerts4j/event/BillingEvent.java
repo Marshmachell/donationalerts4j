@@ -12,6 +12,7 @@ public abstract class BillingEvent extends AlertEvent {
     private String amount;
     @SerializedName("amount_formatted")
     private String amountFormatted;
+    @SerializedName("amount_main")
     private float amountMain;
     private Currency currency;
 

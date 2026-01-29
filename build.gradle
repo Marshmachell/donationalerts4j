@@ -11,8 +11,8 @@ repositories {
 }
 
 dependencies {
-    implementation('com.google.code.gson:gson:2.13.2')
-    implementation('io.socket:socket.io-client:0.8.1')
+    implementation("com.google.code.gson:gson:${project.gson_version}")
+    implementation("io.socket:socket.io-client:${project.io_socket_version}")
 }
 
 java {
