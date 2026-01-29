@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     implementation("com.google.code.gson:gson:${project.gson_version}")
-    implementation("io.socket:socket.io-client:${project.io_socket_version}")
+    implementation("io.socket:socket.io-client:${project.socket_version}")
 }
 
 java {
