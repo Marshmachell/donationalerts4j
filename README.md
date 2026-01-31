@@ -22,7 +22,7 @@ This library is intented for implementing listeners [DonationAlerts][donation-al
 
 This library is available only on [JitPack](https://jitpack.io). The latest version is always shown in the [GitHub Release](https://github.com/Marshmachell/donationalerts4j/releases/latest).
 
-The minimum java version supported by JDA is **Java SE 8**.
+The minimum java version supported by **DA4J** is **Java SE 8**.
 
 ### Gradle
 
