@@ -4,7 +4,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 .kotlin
-/src/main/java/net/marsh/donationalerts4j/ClientTest.java
+/src/main/java/net/marsh/donationalerts4j/test
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

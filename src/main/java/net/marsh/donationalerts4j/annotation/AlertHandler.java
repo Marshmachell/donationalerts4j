@@ -11,4 +11,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AlertHandler {
     EventPriority priority() default EventPriority.NORMAL;
+    boolean ignored() default false;
 }

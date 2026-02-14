@@ -7,7 +7,6 @@ import com.google.gson.annotations.SerializedName;
 import net.marsh.donationalerts4j.adapter.AdditionalDataAdapter;
 import net.marsh.donationalerts4j.data.AdditionalData;
 import net.marsh.donationalerts4j.enums.AlertType;
-import net.marsh.donationalerts4j.listener.AlertListener;
 
 public abstract class AlertEvent {
     private int id;
@@ -60,15 +59,9 @@ public abstract class AlertEvent {
         return messageType;
     }
 
-    public static class Builder {
-        private final String json;
-
-        public Builder(String json) {
-            this.json = json;
-        }
-
+    public record Builder(String json) {
         public JsonObject getJson() {
-            return new Gson().fromJson(json, JsonObject.class);
+                return new Gson().fromJson(json, JsonObject.class);
         }
 
         public AlertEvent build() {

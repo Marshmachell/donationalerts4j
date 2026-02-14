@@ -25,9 +25,9 @@ public enum AlertType {
     @SerializedName("19")
     TwitchPoints(19, TwitchPointsEvent.class),
     @SerializedName("30")
-    BoostyBuyGiftSubscription(30, BoostyBuyGiftSubscription.class),
+    BoostyBuyGiftSubscription(30, BoostyBuyGiftSubscriptionEvent.class),
     @SerializedName("29")
-    BoostyAcceptGiftSubscription(29, BoostyAcceptGiftSubscription.class);
+    BoostyAcceptGiftSubscription(29, BoostyAcceptGiftSubscriptionEvent.class);
 
     private final int id;
     private final Class<? extends AlertEvent> clazz;

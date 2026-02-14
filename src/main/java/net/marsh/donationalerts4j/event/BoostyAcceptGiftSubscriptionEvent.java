@@ -1,6 +1,6 @@
 package net.marsh.donationalerts4j.event;
 
-public class BoostyAcceptGiftSubscription extends AlertEvent {
+public class BoostyAcceptGiftSubscriptionEvent extends AlertEvent {
     public String getSender() {
         return additionalData != null && additionalData.eventData != null ? additionalData.eventData.sender : null;
     }

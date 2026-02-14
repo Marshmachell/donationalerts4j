@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'org.jetbrains.kotlin.jvm'
 }
 
 group = 'com.github.Marshmachell'
@@ -13,6 +14,7 @@ repositories {
 dependencies {
     implementation("com.google.code.gson:gson:${project.gson_version}")
     implementation("io.socket:socket.io-client:${project.socket_version}")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 java {
@@ -31,4 +33,7 @@ publishing {
 wrapper {
     gradleVersion = "8.14"
     distributionType = Wrapper.DistributionType.ALL
+}
+kotlin {
+    jvmToolchain(17)
 }

@@ -7,8 +7,11 @@ public class DonationEvent extends BillingEvent {
     @SerializedName("tts_url")
     private String ttsUrl;
 
+    public String getMessage() {
+        return message;
+    }
+
     public String getTtsUrl() {
         return ttsUrl;
     }
-
 }
